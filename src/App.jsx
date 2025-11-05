@@ -12,8 +12,7 @@ const Reports = lazy(() => import('./pages/Reports'))
 const Regulations = lazy(() => import('./pages/Regulations'))
 const Collaboration = lazy(() => import('./pages/Collaboration'))
 const Security = lazy(() => import('./pages/Security'))
-const DemoRequest = lazy(() => import('./pages/DemoRequest'))
-const VisiteVirtuelle360 = lazy(() => import('./pages/VisiteVirtuelle360'))
+// Removed pages
 const AnalyseIA = lazy(() => import('./pages/AnalyseIA'))
 const Profile = lazy(() => import('./pages/Profile'))
 
@@ -27,13 +26,11 @@ export default function App() {
           <Route path="/map" element={<Map />} />
           <Route path="/antennas" element={<Antennas />} />
           <Route path="/ai" element={<AnalyseIA />} />
-          <Route path="/viewer" element={<VisiteVirtuelle360 />} />
           <Route path="/viewer-old" element={<Viewer360 />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/regulations" element={<Regulations />} />
           <Route path="/collaboration" element={<Collaboration />} />
           <Route path="/security" element={<Security />} />
-          <Route path="/demo" element={<DemoRequest />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

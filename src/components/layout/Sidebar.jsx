@@ -1,17 +1,15 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Map, Radio, BrainCircuit, Cuboid, FileText, ShieldCheck, Users, Lock, CalendarDays } from 'lucide-react'
+import { LayoutDashboard, Map, Radio, BrainCircuit, FileText, ShieldCheck, Users, Lock } from 'lucide-react'
 
 const nav = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/map', label: 'Cartographie', icon: Map },
   { to: '/antennas', label: 'Gestion Antennes', icon: Radio },
   { to: '/ai', label: 'Analyse IA', icon: BrainCircuit },
-  { to: '/viewer', label: 'Visite 360°', icon: Cuboid },
   { to: '/reports', label: 'Rapports', icon: FileText },
   { to: '/regulations', label: 'Réglementation', icon: ShieldCheck },
   { to: '/collaboration', label: 'Communication', icon: Users },
   { to: '/security', label: 'Sécurité', icon: Lock },
-  { to: '/demo', label: 'Demande de Démo', icon: CalendarDays },
 ]
 
 export default function Sidebar({ onNavigate }) {

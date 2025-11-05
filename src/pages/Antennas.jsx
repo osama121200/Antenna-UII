@@ -4,6 +4,7 @@ import Page from '../components/motion/Page'
 import { useMemo, useState } from 'react'
 import { antennas as allAntennas } from '../data/antennas'
 import { CheckCircle2, Wrench, CalendarDays } from 'lucide-react'
+import AntennaPlanDynamic from '../components/antennas/AntennaPlanDynamic'
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true },
@@ -71,6 +72,8 @@ export default function Antennas() {
     })
   }, [])
 
+  
+
   return (
     <Page>
       <div className="container-page space-y-6">
@@ -119,6 +122,11 @@ export default function Antennas() {
             onSort={(k, dir) => { setSortKey(k); setSortDir(dir) }}
           />
         </Card>
+
+        <section className="mt-10 bg-gray-50 p-6 rounded-xl shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">Plan d’antenne interactif</h2>
+          <AntennaPlanDynamic />
+        </section>
       </div>
     </Page>
   )

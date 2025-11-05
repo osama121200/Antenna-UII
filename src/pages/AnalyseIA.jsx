@@ -8,14 +8,14 @@ import { Wrench, AlertTriangle, Flag } from 'lucide-react'
 const COLORS = ['#2563eb', '#60a5fa', '#ef4444']
 
 const regions = [
-  'Île-de-France',
-  'Auvergne-Rhône-Alpes',
-  'Hauts-de-France',
-  'Provence-Alpes-Côte d\'Azur',
-  'Occitanie',
-  'Bretagne',
-  'Pays de la Loire',
-  'Normandie',
+  'Ville06',
+  'Ville07',
+  'Ville08',
+  'Ville09',
+  'Ville10',
+  'Ville11',
+  'Ville12',
+  'Ville13',
 ]
 
 const antennaTypes = ['4G', '5G', 'Radio']
@@ -47,10 +47,10 @@ function generateInspectionTrend() {
 function generateInsights() {
   const candidates = [
     'Anomalies de corrosion en hausse dans les zones côtières.',
-    'Antennes 5G en Île-de-France présentent +12% de risque ce mois.',
+    'Antennes 5G en Ville06 présentent +12% de risque ce mois.',
     'Baisse anormale du signal détectée sur 3 sites.',
     'Végétation proche détectée: inspection recommandée sous 7 jours.',
-    'Taux de défauts inférieur à la moyenne nationale en Bretagne.',
+    'Taux de défauts inférieur à la moyenne nationale en Ville11.',
   ]
   const n = rand(2, 4)
   const picks = new Set()

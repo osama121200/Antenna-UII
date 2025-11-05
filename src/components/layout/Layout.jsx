@@ -19,7 +19,7 @@ export default function Layout({ children }) {
 
         {/* Content column offset by sidebar on md+ */}
         <div className="ml-0 md:ml-[260px] min-h-screen flex flex-col">
-          <header className="h-14 bg-white border-b border-gray-200 w-full relative z-50">
+          <header className="h-14 bg-white border-b border-gray-200 w-full relative z-[10000]">
             <Topbar onMenu={() => setOpen((v) => !v)} />
           </header>
           <main className="flex-1 min-h-0 overflow-auto w-full flex flex-col">

@@ -75,7 +75,7 @@ export default function Topbar({ onMenu }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18 }}
-                className="absolute right-0 mt-2 w-[360px] max-w-[85vw] bg-white/95 backdrop-blur border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden"
+                className="absolute right-0 mt-2 w-[360px] max-w-[85vw] bg-white/95 backdrop-blur border border-gray-200 rounded-xl shadow-2xl z-[10001] overflow-hidden"
               >
                 <div className="px-4 py-3 text-sm font-semibold border-b">Notifications</div>
                 <div className="max-h-80 overflow-y-auto p-2 space-y-2">
@@ -112,7 +112,7 @@ export default function Topbar({ onMenu }) {
             <span className="text-sm hidden sm:block">Compte</span>
           </button>
           {open && (
-            <div className="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-card p-1 z-50">
+            <div className="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-card p-1 z-[10001]">
               <Link
                 to="/profile"
                 className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded"

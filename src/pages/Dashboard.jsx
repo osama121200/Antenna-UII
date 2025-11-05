@@ -29,9 +29,9 @@ export default function Dashboard() {
   ]
 
   const recentReports = [
-    { id: 'R-2025-091', site: 'Antenne A12 - Lyon', date: '05/10/2025', status: 'Validé' },
-    { id: 'R-2025-090', site: 'Antenne B07 - Nantes', date: '04/10/2025', status: 'En revue' },
-    { id: 'R-2025-089', site: 'Antenne C19 - Lille', date: '03/10/2025', status: 'Validé' },
+    { id: 'R-2025-091', site: 'Antenne A12 - Ville01', date: '05/10/2025', status: 'Validé' },
+    { id: 'R-2025-090', site: 'Antenne B07 - Ville02', date: '04/10/2025', status: 'En revue' },
+    { id: 'R-2025-089', site: 'Antenne C19 - Ville03', date: '03/10/2025', status: 'Validé' },
   ]
 
   return (
