@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { antennas as allAntennas } from '../data/antennas'
 import { CheckCircle2, Wrench, CalendarDays } from 'lucide-react'
 import AntennaPlanDynamic from '../components/antennas/AntennaPlanDynamic'
+import LazyImage from '../components/ui/LazyImage'
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true },
@@ -52,9 +53,9 @@ export default function Antennas() {
     })
   }, [q, status, type, sortKey, sortDir])
 
-  // Build visual grid of antenna thumbnails with statuses
+  // Build visual grid of antenna thumbnails with statuses (default Vite ?url behavior)
   const gallery = useMemo(() => {
-    const modules = import.meta.glob('../assets/images/gestionAntennes/*.{jpg,JPG,jpeg,png,webp}', { eager: true, as: 'url' })
+    const modules = import.meta.glob('../assets/images/gestionAntennes/*.{jpg,JPG,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' })
     const urls = Object.entries(modules).map(([path, url]) => ({ path, url }))
     const statuses = [
       { label: 'Active', tone: 'badge-green', Icon: CheckCircle2 },
@@ -99,9 +100,7 @@ export default function Antennas() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {gallery.map((a, i) => (
               <div key={i} className="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group">
-                <div className="aspect-video overflow-hidden">
-                  <img src={a.url} alt={a.name} className="w-full h-full object-cover transform group-hover:scale-[1.03] transition-transform duration-200" />
-                </div>
+                <LazyImage src={a.url} alt={a.name} ratioClass="aspect-video" imgClassName="transform group-hover:scale-[1.03] transition-transform duration-200" />
                 <div className="px-3 py-2 text-sm flex items-center justify-between gap-2">
                   <div className="font-medium text-gray-800 truncate" title={a.name}>{a.name}</div>
                   <span className={`badge ${a.status.tone} inline-flex items-center gap-1 whitespace-nowrap`}>

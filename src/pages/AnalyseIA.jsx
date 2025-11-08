@@ -4,6 +4,7 @@ import Card from '../components/ui/Card'
 import { motion } from 'framer-motion'
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { Wrench, AlertTriangle, Flag } from 'lucide-react'
+import LazyImage from '../components/ui/LazyImage'
 
 const COLORS = ['#2563eb', '#60a5fa', '#ef4444']
 
@@ -83,9 +84,9 @@ export default function AnalyseIA() {
   const predictedFailures = Math.max(1, Math.round(totals.critical * 0.3))
   const priorityActions = Math.max(1, Math.round((totals.maintenance + totals.critical) * 0.2))
 
-  // Load showcase images from assets and attach sample AI categories
+  // Load showcase images from assets and attach sample AI categories (default Vite ?url behavior)
   const analysedItems = useMemo(() => {
-    const modules = import.meta.glob('../assets/images/analyseIA/*.{jpg,JPG,jpeg,png,webp}', { eager: true, as: 'url' })
+    const modules = import.meta.glob('../assets/images/analyseIA/*.{jpg,JPG,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' })
     const urls = Object.values(modules)
     const categories = [
       'Corrosion détectée',
@@ -202,9 +203,12 @@ export default function AnalyseIA() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {analysedItems.map((it, i) => (
               <div key={i} className="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group">
-                <div className="aspect-video overflow-hidden">
-                  <img src={it.url} alt={it.label} className="w-full h-full object-cover transform group-hover:scale-[1.03] transition-transform duration-200" />
-                </div>
+                <LazyImage
+                  src={it.url}
+                  alt={it.label}
+                  ratioClass="aspect-video"
+                  imgClassName="transform group-hover:scale-[1.03] transition-transform duration-200"
+                />
                 <div className="px-3 py-2 text-sm">
                   <div className="font-medium text-gray-800">{it.label}</div>
                   <div className="text-xs text-gray-600">Classification IA</div>
