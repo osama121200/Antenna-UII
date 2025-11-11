@@ -1,11 +1,11 @@
 import Card from '../components/ui/Card'
 import Table from '../components/ui/Table'
 import Page from '../components/motion/Page'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { antennas as allAntennas } from '../data/antennas'
 import { CheckCircle2, Wrench, CalendarDays } from 'lucide-react'
 import AntennaPlanDynamic from '../components/antennas/AntennaPlanDynamic'
-import LazyImage from '../components/ui/LazyImage'
+import ImageOverlay from '../components/ui/ImageOverlay'
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true },
@@ -32,6 +32,12 @@ export default function Antennas() {
   const [type, setType] = useState('')
   const [sortKey, setSortKey] = useState('')
   const [sortDir, setSortDir] = useState('asc')
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false)
+  const [activeAntenna, setActiveAntenna] = useState(null)
+  const [imgQ, setImgQ] = useState('')
+  const [imgDropdownOpen, setImgDropdownOpen] = useState(false)
+
+  const predefinedAntennaNames = ['Antenne Ville01', 'Antenne Ville02', 'Antenne Ville03']
 
   const filtered = useMemo(() => {
     const base = allAntennas.filter(a => {
@@ -53,25 +59,47 @@ export default function Antennas() {
     })
   }, [q, status, type, sortKey, sortDir])
 
-  // Build visual grid of antenna thumbnails with statuses (default Vite ?url behavior)
-  const gallery = useMemo(() => {
+  // Build list of all images from the gestionAntennes folder
+  const allImages = useMemo(() => {
     const modules = import.meta.glob('../assets/images/gestionAntennes/*.{jpg,JPG,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' })
     const urls = Object.entries(modules).map(([path, url]) => ({ path, url }))
-    const statuses = [
-      { label: 'Active', tone: 'badge-green', Icon: CheckCircle2 },
-      { label: 'En maintenance', tone: 'badge-yellow', Icon: Wrench },
-      { label: 'Planifiée', tone: 'badge-blue', Icon: CalendarDays },
-    ]
     function humanize(name) {
       const base = name.replace(/\\\\/g, '/').split('/').pop() || name
       const noExt = base.replace(/\.[^.]+$/, '')
       return noExt.replace(/[_-]+/g, ' ')
     }
-    return urls.slice(0, 12).map((it, i) => {
-      const s = statuses[i % statuses.length]
-      return { name: humanize(it.path), url: it.url, status: s }
-    })
+    return urls.map((it) => ({ name: humanize(it.path), url: it.url }))
   }, [])
+
+  // Partition images among the three predefined antennas (>=12 each)
+  const imagesByAntenna = useMemo(() => {
+    const chunkSize = Math.max(12, Math.ceil(allImages.length / 3))
+    return {
+      'Antenne Ville01': allImages.slice(0, chunkSize),
+      'Antenne Ville02': allImages.slice(chunkSize, chunkSize * 2),
+      'Antenne Ville03': allImages.slice(chunkSize * 2),
+    }
+  }, [allImages])
+
+  const closeGallery = () => {
+    setIsGalleryOpen(false)
+  }
+
+  function confirmAntenna(name) {
+    setActiveAntenna(name)
+    setIsGalleryOpen(true)
+    setImgDropdownOpen(false)
+  }
+
+  function handleImageSearchKeyDown(e) {
+    if (e.key === 'Enter') {
+      const normalized = imgQ.trim().toLowerCase()
+      const found = predefinedAntennaNames.find(n => n.toLowerCase() === normalized)
+      if (found) confirmAntenna(found)
+    } else if (e.key === 'Escape') {
+      setImgDropdownOpen(false)
+    }
+  }
 
   
 
@@ -96,19 +124,43 @@ export default function Antennas() {
             <div className="text-sm text-gray-500 flex items-center justify-start md:justify-end h-10">{filtered.length} résultats</div>
           </div>
         </Card>
-        <Card title="Vignettes des antennes">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {gallery.map((a, i) => (
-              <div key={i} className="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group">
-                <LazyImage src={a.url} alt={a.name} ratioClass="aspect-video" imgClassName="transform group-hover:scale-[1.03] transition-transform duration-200" />
-                <div className="px-3 py-2 text-sm flex items-center justify-between gap-2">
-                  <div className="font-medium text-gray-800 truncate" title={a.name}>{a.name}</div>
-                  <span className={`badge ${a.status.tone} inline-flex items-center gap-1 whitespace-nowrap`}>
-                    <a.status.Icon size={14} /> {a.status.label}
-                  </span>
+
+        {/* Recherche images antennes */}
+        <Card title="Recherche images d'antenne">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start relative">
+            <div className="relative">
+              <input
+                className="input h-10 w-full"
+                placeholder="Recherche (ex: Antenne Ville01)"
+                value={imgQ}
+                onChange={(e) => { setImgQ(e.target.value); setImgDropdownOpen(true) }}
+                onFocus={() => setImgDropdownOpen(true)}
+                onKeyDown={handleImageSearchKeyDown}
+              />
+              {imgDropdownOpen && (
+                <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg">
+                  {predefinedAntennaNames
+                    .filter(n => n.toLowerCase().includes(imgQ.trim().toLowerCase()))
+                    .map(n => (
+                      <button
+                        key={n}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => confirmAntenna(n)}
+                      >
+                        {n}
+                      </button>
+                    ))
+                  }
+                  {predefinedAntennaNames.filter(n => n.toLowerCase().includes(imgQ.trim().toLowerCase())).length === 0 && (
+                    <div className="px-3 py-2 text-sm text-gray-500">Aucune correspondance</div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )}
+            </div>
+            <div className="md:col-span-2 text-sm text-gray-500">
+              Exemples: Antenne Ville01, Antenne Ville02, Antenne Ville03
+            </div>
           </div>
         </Card>
 
@@ -127,6 +179,15 @@ export default function Antennas() {
           <AntennaPlanDynamic />
         </section>
       </div>
+
+      <ImageOverlay
+        open={isGalleryOpen}
+        title={activeAntenna}
+        images={(imagesByAntenna[activeAntenna] || [])}
+        ratioClass="aspect-square"
+        getMeta={(_img, idx) => [`#${idx + 1}`]}
+        onClose={closeGallery}
+      />
     </Page>
   )
 }

@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Page from '../components/motion/Page'
 import Card from '../components/ui/Card'
 import { motion } from 'framer-motion'
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { Wrench, AlertTriangle, Flag } from 'lucide-react'
 import LazyImage from '../components/ui/LazyImage'
+import ImageOverlay from '../components/ui/ImageOverlay'
 
 const COLORS = ['#2563eb', '#60a5fa', '#ef4444']
 
@@ -64,6 +65,13 @@ export default function AnalyseIA() {
   const [regionDefects, setRegionDefects] = useState(generateDefectsByRegion())
   const [trend, setTrend] = useState(generateInspectionTrend())
   const [insights, setInsights] = useState(generateInsights())
+  // Search + overlay state
+  const [q, setQ] = useState('')
+  const [imgQ, setImgQ] = useState('')
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false)
+  const [activeAnalysis, setActiveAnalysis] = useState(null)
+  const predefinedAnalyses = ['Analyse Ville01', 'Analyse Ville02', 'Analyse Ville03']
   const dataKey = useMemo(() => Date.now(), [statusData, regionDefects, trend])
 
   const totals = useMemo(() => {
@@ -84,22 +92,50 @@ export default function AnalyseIA() {
   const predictedFailures = Math.max(1, Math.round(totals.critical * 0.3))
   const priorityActions = Math.max(1, Math.round((totals.maintenance + totals.critical) * 0.2))
 
-  // Load showcase images from assets and attach sample AI categories (default Vite ?url behavior)
-  const analysedItems = useMemo(() => {
+  // Load all images from assets/analyseIA
+  const allImages = useMemo(() => {
     const modules = import.meta.glob('../assets/images/analyseIA/*.{jpg,JPG,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' })
-    const urls = Object.values(modules)
-    const categories = [
-      'Corrosion détectée',
-      'Isolateur endommagé',
-      'Câble desserré',
-      'Végétation proche',
-      'Structure fissurée',
-      'Objets étrangers',
-      'Équipement manquant',
-      'Débris sur site',
-    ]
-    return urls.slice(0, 12).map((url, i) => ({ url, label: categories[i % categories.length] }))
+    const urls = Object.entries(modules).map(([path, url]) => ({ path, url }))
+    function humanize(name) {
+      const base = name.replace(/\\\\/g, '/').split('/').pop() || name
+      const noExt = base.replace(/\.[^.]+$/, '')
+      return noExt.replace(/[_-]+/g, ' ')
+    }
+    return urls.map(({ path, url }) => ({ name: humanize(path), url }))
   }, [])
+
+  // Partition images into 3 analysis groups (>=12 each)
+  const imagesByAnalysis = useMemo(() => {
+    const chunkSize = Math.max(12, Math.ceil(allImages.length / 3))
+    return {
+      'Analyse Ville01': allImages.slice(0, chunkSize),
+      'Analyse Ville02': allImages.slice(chunkSize, chunkSize * 2),
+      'Analyse Ville03': allImages.slice(chunkSize * 2),
+    }
+  }, [allImages])
+
+  const anomalyTypes = ['Corrosion', 'Isolateur endommagé', 'Câble desserré', 'Végétation proche', 'Structure fissurée', 'Objet étranger']
+  const detectionResults = ['Confiance 0.82', 'Confiance 0.91', 'Confiance 0.74', 'Confiance 0.88', 'Confiance 0.96']
+
+  function confirmAnalysis(name) {
+    setActiveAnalysis(name)
+    setIsGalleryOpen(true)
+    setDropdownOpen(false)
+  }
+
+  function handleSearchKeyDown(e) {
+    if (e.key === 'Enter') {
+      const normalized = imgQ.trim().toLowerCase()
+      const found = predefinedAnalyses.find(n => n.toLowerCase() === normalized)
+      if (found) confirmAnalysis(found)
+    } else if (e.key === 'Escape') {
+      setDropdownOpen(false)
+    }
+  }
+
+  const closeGallery = () => {
+    setIsGalleryOpen(false)
+  }
 
   return (
     <Page>
@@ -108,6 +144,44 @@ export default function AnalyseIA() {
           <h1 className="text-xl font-semibold">Analyse IA</h1>
           <button className="px-3 py-2 bg-primary text-white rounded" onClick={simulate}>Simuler l'analyse IA</button>
         </div>
+
+        {/* Search bar (same style/size as Antennas) */}
+        <Card title="Recherche d'analyse">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+            <div className="relative">
+              <input
+                className="input h-10 w-full"
+                placeholder="Recherche analyse (ex: Analyse Ville01)"
+                value={imgQ}
+                onChange={(e) => { setImgQ(e.target.value); setDropdownOpen(true) }}
+                onFocus={() => setDropdownOpen(true)}
+                onKeyDown={handleSearchKeyDown}
+              />
+              {dropdownOpen && (
+                <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg">
+                  {predefinedAnalyses
+                    .filter(n => n.toLowerCase().includes(imgQ.trim().toLowerCase()))
+                    .map(n => (
+                      <button
+                        key={n}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => confirmAnalysis(n)}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  {predefinedAnalyses.filter(n => n.toLowerCase().includes(imgQ.trim().toLowerCase())).length === 0 && (
+                    <div className="px-3 py-2 text-sm text-gray-500">Aucune correspondance</div>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="md:col-span-2 text-sm text-gray-500">
+              Exemples: Analyse Ville01, Analyse Ville02, Analyse Ville03
+            </div>
+          </div>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card title="Statut des antennes">
@@ -199,24 +273,7 @@ export default function AnalyseIA() {
           </Card>
         </div>
 
-        <Card title="Exemples analysés (IA)">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {analysedItems.map((it, i) => (
-              <div key={i} className="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group">
-                <LazyImage
-                  src={it.url}
-                  alt={it.label}
-                  ratioClass="aspect-video"
-                  imgClassName="transform group-hover:scale-[1.03] transition-transform duration-200"
-                />
-                <div className="px-3 py-2 text-sm">
-                  <div className="font-medium text-gray-800">{it.label}</div>
-                  <div className="text-xs text-gray-600">Classification IA</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+        
 
         <Card title="Données de référence">
           <div className="text-sm text-gray-600">
@@ -227,6 +284,22 @@ export default function AnalyseIA() {
           </div>
         </Card>
       </div>
+
+      <ImageOverlay
+        open={isGalleryOpen}
+        title={activeAnalysis}
+        images={(imagesByAnalysis[activeAnalysis] || [])}
+        ratioClass="aspect-square"
+        getMeta={(_img, idx) => {
+          const meta = {
+            detection: detectionResults[idx % detectionResults.length],
+            height: `${20 + (idx % 30)} m`,
+            anomaly: anomalyTypes[idx % anomalyTypes.length],
+          }
+          return [`${meta.anomaly} · ${meta.height}`, meta.detection]
+        }}
+        onClose={closeGallery}
+      />
     </Page>
   )
 }
